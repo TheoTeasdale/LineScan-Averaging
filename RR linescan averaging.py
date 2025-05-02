@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import base64
 import re
-import matplotlib.pyplot as plt
+import altair as alt
 
 def round_to_nearest(value, step):
     """Round value to the nearest multiple of 'step'."""
@@ -101,17 +101,22 @@ def main():
 
     # --- Plot with Annotations ---
     st.subheader("Averaged Line Scan")
-    fig, ax = plt.subplots()
-    ax.plot(result_df["X"], result_df["Y_mean"], label="Y_mean", color='blue')
-    ax.axhline(baseline_mean, color='green', linestyle='--', label="Baseline")
-    ax.axhline(threshold, color='red', linestyle='--', label="Baseline + 1 Std Dev")
-    if not np.isnan(recovery_point):
-        ax.axvline(recovery_point, color='orange', linestyle=':', label="Recovery Point")
-    ax.set_xlabel("Distance (X)")
-    ax.set_ylabel("KAM Value (Y_mean)")
-    ax.set_title("Averaged Line Scan with Baseline and Recovery Point")
-    ax.legend()
-    st.pyplot(fig)
+    base = alt.Chart(result_df).mark_line(color='blue').encode(
+        x='X',
+        y='Y_mean'
+    )
+
+    baseline_line = alt.Chart(pd.DataFrame({'Y': [baseline_mean]})).mark_rule(color='green', strokeDash=[5,5]).encode(y='Y')
+    threshold_line = alt.Chart(pd.DataFrame({'Y': [threshold]})).mark_rule(color='red', strokeDash=[5,5]).encode(y='Y')
+    recovery_marker = alt.Chart(pd.DataFrame({'X': [recovery_point]})).mark_rule(color='orange', strokeDash=[2,2]).encode(x='X')
+
+    chart = (base + baseline_line + threshold_line + recovery_marker).properties(
+        width=700,
+        height=400,
+        title="Averaged Line Scan with Baseline and Recovery Point"
+    )
+
+    st.altair_chart(chart, use_container_width=True)
 
     # --- Table and Download ---
     st.dataframe(result_df)
