@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import base64
 import re
+import matplotlib.pyplot as plt
 
 def round_to_nearest(value, step):
     """Round value to the nearest multiple of 'step'."""
@@ -54,19 +55,19 @@ def main():
 
         # Replace 0 values in Y with NaN
         df["Y"] = df["Y"].replace(0, np.nan)
-        
+
         # Round the X values to the nearest 0.2 µm
         df["X"] = df["X"].apply(lambda x: round_to_nearest(x, 0.2))
-        
+
         # Drop duplicates for the current scan (keep first occurrence)
         df = df.drop_duplicates(subset="X", keep="first")
-        
+
         # Add the X values to the global set of X values
         all_x_values.update(df["X"])
 
         # Sort and set X as the index
         df = df.sort_values("X").set_index("X")
-        
+
         scans.append(df["Y"])
 
     # Create the unified list of X values from all files
@@ -84,11 +85,37 @@ def main():
 
     result_df = combined.reset_index().rename(columns={"index": "X"})
 
+    # --- Baseline and Recovery Point Calculation ---
+    st.subheader("Baseline and Recovery Analysis")
+    tail_section = result_df[result_df["X"] >= result_df["X"].max() - 50]  # Last 50 µm
+    baseline_mean = tail_section["Y_mean"].mean()
+    baseline_std = tail_section["Y_mean"].std()
+
+    threshold = baseline_mean + baseline_std
+    recovery_df = result_df[result_df["Y_mean"] <= threshold]
+    recovery_point = recovery_df["X"].min() if not recovery_df.empty else np.nan
+
+    st.markdown(f"**Baseline Mean:** {baseline_mean:.4f}")
+    st.markdown(f"**Baseline Std Dev:** {baseline_std:.4f}")
+    st.markdown(f"**Recovery Point (X when Y_mean <= baseline + 1 std):** {recovery_point:.2f} µm")
+
+    # --- Plot with Annotations ---
     st.subheader("Averaged Line Scan")
-    st.line_chart(result_df.set_index("X")["Y_mean"])
+    fig, ax = plt.subplots()
+    ax.plot(result_df["X"], result_df["Y_mean"], label="Y_mean", color='blue')
+    ax.axhline(baseline_mean, color='green', linestyle='--', label="Baseline")
+    ax.axhline(threshold, color='red', linestyle='--', label="Baseline + 1 Std Dev")
+    if not np.isnan(recovery_point):
+        ax.axvline(recovery_point, color='orange', linestyle=':', label="Recovery Point")
+    ax.set_xlabel("Distance (X)")
+    ax.set_ylabel("KAM Value (Y_mean)")
+    ax.set_title("Averaged Line Scan with Baseline and Recovery Point")
+    ax.legend()
+    st.pyplot(fig)
+
+    # --- Table and Download ---
     st.dataframe(result_df)
 
-    # Download link
     csv = result_df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
     href = (
