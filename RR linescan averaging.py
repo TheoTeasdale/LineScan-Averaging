@@ -102,8 +102,8 @@ def main():
     # --- Plot with Annotations ---
     st.subheader("Averaged Line Scan")
     base = alt.Chart(result_df).mark_line(color='blue').encode(
-        x='X (μm)',
-        y='mean KAM (°)'
+        x='r'$\mu$'m',
+        y='y'
     )
 
     baseline_line = alt.Chart(pd.DataFrame({'Y': [baseline_mean]})).mark_rule(color='green', strokeDash=[5,5]).encode(y='Y')
