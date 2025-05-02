@@ -51,6 +51,9 @@ def main():
         # Assume first column is X, second is Y
         df = df.iloc[:, :2].dropna()
         df.columns = ["X", "Y"]
+
+        # Replace 0 values in Y with NaN
+        df["Y"] = df["Y"].replace(0, np.nan)
         
         # Round the X values to the nearest 0.2 µm
         df["X"] = df["X"].apply(lambda x: round_to_nearest(x, 0.2))
