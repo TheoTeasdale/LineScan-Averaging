@@ -86,7 +86,7 @@ def main():
     result_df = combined.reset_index().rename(columns={"index": "X"})
 
     # --- Baseline and Recovery Point Calculation ---
-    st.subheader("Baseline and Recovery Analysis")
+    st.subheader("Deformation Zone Analysis")
     tail_section = result_df[result_df["X"] >= result_df["X"].max() - 50]  # Last 50 µm
     baseline_mean = tail_section["Y_mean"].mean()
     baseline_std = tail_section["Y_mean"].std()
@@ -97,13 +97,13 @@ def main():
 
     st.markdown(f"**Baseline Mean:** {baseline_mean:.4f}")
     st.markdown(f"**Baseline Std Dev:** {baseline_std:.4f}")
-    st.markdown(f"**Recovery Point (X when Y_mean <= baseline + 1 std):** {recovery_point:.2f} µm")
+    st.markdown(f"**Deformation Zone Size:** {recovery_point:.2f} µm")
 
     # --- Plot with Annotations ---
     st.subheader("Averaged Line Scan")
     base = alt.Chart(result_df).mark_line(color='blue').encode(
-        x='X',
-        y='Y_mean'
+        x='X (u'\N{mu}'m)',
+        y='mean KAM (u'\N{DEGREE SIGN}''
     )
 
     baseline_line = alt.Chart(pd.DataFrame({'Y': [baseline_mean]})).mark_rule(color='green', strokeDash=[5,5]).encode(y='Y')
@@ -113,7 +113,7 @@ def main():
     chart = (base + baseline_line + threshold_line + recovery_marker).properties(
         width=700,
         height=400,
-        title="Averaged Line Scan with Baseline and Recovery Point"
+        title="Averaged Line Scan with Baseline, Standard Deviation and Intercept Point"
     )
 
     st.altair_chart(chart, use_container_width=True)
