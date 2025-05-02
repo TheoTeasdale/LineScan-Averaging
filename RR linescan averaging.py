@@ -102,7 +102,7 @@ def main():
     # --- Plot with Annotations ---
     st.subheader("Averaged Line Scan")
     base = alt.Chart(result_df).mark_line(color='blue').encode(
-        x='x',
+        x='x (µm)',
         y='y'
     )
 
