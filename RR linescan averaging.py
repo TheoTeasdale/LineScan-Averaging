@@ -103,7 +103,7 @@ def main():
     st.subheader("Averaged Line Scan")
     base = alt.Chart(result_df).mark_line(color='blue').encode(
         x='x (µm):Q',
-        y='y'
+        y='y:Q'
     )
 
     baseline_line = alt.Chart(pd.DataFrame({'Y': [baseline_mean]})).mark_rule(color='green', strokeDash=[5,5]).encode(y='Y')
