@@ -87,7 +87,7 @@ def main():
 
     # --- Baseline and Recovery Point Calculation ---
     st.subheader("Deformation Zone Analysis")
-    tail_section = result_df[result_df["X"] >= result_df["X"].max() - 50]  # Last 50 µm
+    tail_section = result_df[result_df["X"] >= result_df["X"].max() - 75]  # Last 50 µm
     baseline_mean = tail_section["Y_mean"].mean()
     baseline_std = tail_section["Y_mean"].std()
 
