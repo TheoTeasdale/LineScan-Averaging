@@ -30,9 +30,10 @@ def main():
         st.info("Awaiting CSV file uploads...")
         return
 
-    scans = []
+     scans = []
     all_x_values = set()
-    scan_labels = []  # List to store scan labels
+    scan_labels = []
+    max_x_values = []  # Collect max X from each scan
 
     for uploaded_file in uploaded_files:
         try:
@@ -40,6 +41,33 @@ def main():
         except Exception as e:
             st.error(f"Could not read {uploaded_file.name}: {e}")
             return
+
+        if df.shape[1] < 2:
+            st.error(f"File {uploaded_file.name} does not have at least two columns.")
+            return
+
+        scan_label = extract_scan_number(uploaded_file.name)
+        scan_labels.append(scan_label)
+
+        df = df.iloc[:, :2].dropna()
+        df.columns = ["X", "Y"]
+        df["Y"] = df["Y"].replace(0, np.nan)
+        df["X"] = df["X"].apply(lambda x: round_to_nearest(x, 0.2))
+        df = df.drop_duplicates(subset="X", keep="first")
+        df = df.sort_values("X").set_index("X")
+
+        max_x_values.append(df.index.max())  # Record max X for this scan
+
+        scans.append(df["Y"])
+        all_x_values.update(df.index)
+
+    # Compute average of max X values
+    average_max_x = round_to_nearest(np.mean(max_x_values), 0.2)
+    st.markdown(f"**Average Maximum X (Trim Limit):** {average_max_x:.2f} µm")
+
+    # Reindex and trim each scan to the average max X
+    all_x = sorted([x for x in all_x_values if x <= average_max_x])
+    reindexed = [scan.reindex(all_x) for scan in scans]
 
         if df.shape[1] < 2:
             st.error(f"File {uploaded_file.name} does not have at least two columns.")
