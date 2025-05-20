@@ -95,7 +95,7 @@ def main():
 
     # --- Deformation Analysis ---
     st.subheader("Deformation Zone Analysis")
-    tail_section = result_df[result_df["X"] >= result_df["X"].max() - 75]
+    tail_section = result_df[result_df["X"] >= result_df["X"].max() - 30]
     baseline_mean = tail_section["Y_mean"].mean()
     baseline_std = tail_section["Y_mean"].std()
     threshold = baseline_mean + baseline_std
