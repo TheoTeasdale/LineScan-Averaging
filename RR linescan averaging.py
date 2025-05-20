@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 20 07:47:32 2025
+
+@author: Teasda_T
+"""
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -69,9 +76,9 @@ def main():
     all_x = sorted([x for x in all_x_values if x <= average_max_x])
     reindexed = [scan.reindex(all_x) for scan in scans]
 
-        if df.shape[1] < 2:
-            st.error(f"File {uploaded_file.name} does not have at least two columns.")
-            return
+    if df.shape[1] < 2:
+        st.error(f"File {uploaded_file.name} does not have at least two columns.")
+        return
 
         # Extract the scan label from the filename
         scan_label = extract_scan_number(uploaded_file.name)
