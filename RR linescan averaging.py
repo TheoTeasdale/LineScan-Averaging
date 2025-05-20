@@ -30,7 +30,7 @@ def main():
         st.info("Awaiting CSV file uploads...")
         return
 
-     scans = []
+    scans = []
     all_x_values = set()
     scan_labels = []
     max_x_values = []  # Collect max X from each scan
